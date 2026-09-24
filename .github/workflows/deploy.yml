@@ -25,7 +25,11 @@ jobs:
       #   run: yarn test
 
       - name: Run Build
+        env:
+          VITE_GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
+          VITE_GIST_ID: ${{ secrets.VITE_GIST_ID }}
         run: pnpm run build
+
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.2.5
