@@ -21,5 +21,41 @@
     })()
   </script>
   <script type="module" src="/src/main.ts"></script>
+  // 替换成你自己的信息
+const GIST_ID = "f63d2f77665531ba627b15c6273bc9ed";
+const GITHUB_TOKEN = "你刚复制的ghp_开头令牌";
+
+// 自动拉取云端进度
+async function loadProgressFromCloud() {
+  const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+    headers: { "Authorization": `token ${GITHUB_TOKEN}` }
+  });
+  const data = await res.json();
+  const progress = JSON.parse(data.files["ielts-progress.json"].content);
+  // 把云端进度覆盖到本地缓存
+  localStorage.setItem("ielts-progress", JSON.stringify(progress));
+}
+
+// 自动把本地进度同步到云端
+async function saveProgressToCloud() {
+  const localProgress = JSON.parse(localStorage.getItem("ielts-progress") || "{}");
+  await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+    method: "PATCH",
+    headers: { 
+      "Authorization": `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      files: {
+        "ielts-progress.json": { content: JSON.stringify(localProgress, null, 2) }
+      }
+    })
+  });
+}
+
+// 页面加载自动拉取进度，每次完成练习自动同步
+window.addEventListener("load", loadProgressFromCloud);
+// 你可以在项目原有的练习完成回调里加上saveProgressToCloud()调用
+
 </body>
 </html>
